@@ -2,7 +2,6 @@ import pygame
 
 # just base
 class Binding:
-    """Base class - every input source implements poll()."""
     def poll(self, events):
         raise NotImplementedError
 

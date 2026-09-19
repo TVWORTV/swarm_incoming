@@ -17,8 +17,6 @@ def _distance_to_volume(distance: float) -> float:
 
 
 def _pan_from_offset(dx: float) -> tuple[float, float]:
-    """Returns (left_gain, right_gain) in [0,1] based on horizontal offset.
-    dx > 0 means the source is to the player's right."""
     t = max(-1.0, min(1.0, dx / MAX_PAN_DISTANCE))
     left_gain = min(1.0, 1.0 - t) if t > 0 else 1.0
     right_gain = min(1.0, 1.0 + t) if t < 0 else 1.0

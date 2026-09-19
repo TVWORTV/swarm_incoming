@@ -15,8 +15,6 @@ _BASE_ANGLES = {
 
 
 def _vector_angle(v: pygame.Vector2) -> float:
-    """Angle (deg) of a screen-space vector, matching pygame.transform.rotate's
-    convention: RIGHT=0, UP=90, LEFT=180, DOWN=270, counter-clockwise."""
     return math.degrees(math.atan2(-v.y, v.x)) % 360
 
 

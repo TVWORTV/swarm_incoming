@@ -20,21 +20,6 @@ class RuleTransform(IntFlag):
     FLIPPED_VERTICALLY = auto()
 
 
-def rotate_offset(dx, dy, angle):
-    turns = (angle // 90) % 4
-    for _ in range(turns):
-        dx, dy = -dy, dx
-    return dx, dy
-
-
-def transform_offset(dx, dy, angle, flip_h, flip_v):
-    if flip_h:
-        dx = -dx
-    if flip_v:
-        dy = -dy
-    return rotate_offset(dx, dy, angle)
-
-
 @dataclass
 class Neighbor:
     dx: int
@@ -51,13 +36,13 @@ class Rule:
     transform: RuleTransform = RuleTransform.NONE
 
     def try_match(self, tilemap, x, y, self_tile):
-        for angle, flip_h, flip_v in self._variants():
+        for angle, flip_h, flip_v in self._variants(tilemap):
             if self._matches_variant(tilemap, x, y, self_tile, angle, flip_h, flip_v):
                 return angle, flip_h, flip_v
         return None
 
-    def _variants(self):
-        angles = (0, 90, 180, 270) if self.transform & RuleTransform.ROTATED else (0,)
+    def _variants(self, tilemap):
+        angles = tilemap.layout.rotation_angles() if self.transform & RuleTransform.ROTATED else (0,)
         flips_h = (False, True) if self.transform & RuleTransform.FLIPPED_HORIZONTAL else (False,)
         flips_v = (False, True) if self.transform & RuleTransform.FLIPPED_VERTICALLY else (False,)
 
@@ -68,8 +53,10 @@ class Rule:
 
     def _matches_variant(self, tilemap, x, y, self_tile, angle, flip_h, flip_v):
         for neighbor in self.neighbors:
-            ndx, ndy = transform_offset(neighbor.dx, neighbor.dy, angle, flip_h, flip_v)
-            placed = tilemap.get_placed(x + ndx, y + ndy)
+            nx, ny = tilemap.layout.neighbor_position(
+                x, y, neighbor.dx, neighbor.dy, angle, flip_h, flip_v
+            )
+            placed = tilemap.get_placed(nx, ny)
             if not self._check_neighbor(neighbor, placed, self_tile):
                 return False
         return True
